@@ -6,12 +6,6 @@
 // NPM module to automatically prompt user input
 const prompt = require('../node_modules/prompt-sync')({sigint: true});
 
-// Characters that make up the field of play
-const hat = '^';
-const hole = 'O';
-const fieldCharacter = '░';
-const pathCharacter = '*';
-
 // Field of play Class
 class Field {
   constructor(array) {
@@ -22,9 +16,38 @@ class Field {
     this.yMax = array.length - 1;
   }
 
-  print() {
+  renderField() {
     let fieldPrintPrep = this.field.map(e => '\t' + e.join(''));
     console.log(fieldPrintPrep.join('\n'));
+  }
+
+  askDirection() {
+    let input = prompt('Which direction? ');
+    return input;
+  }
+
+  move(direction) {
+    switch (direction) {
+      case 'r': 
+        this.xAxis += 1;
+        return [this.xAxis, this.yAxis];
+      case 'l': 
+        this.xAxis -= 1;
+        return [this.xAxis, this.yAxis];
+      case 'u': 
+        this.yAxis -= 1;
+        return [this.xAxis, this.yAxis];
+      case 'd': 
+        this.yAxis += 1;
+        return [this.xAxis, this.yAxis];
+      default:
+        console.log('-- PLEASE ENTER [r] [l] [u] OR [d] FOR DIRECTION --');
+        return 'invalid';
+    }
+  }
+
+  correctInput() {
+
   }
 
   checkNextStep(x, y) {
@@ -43,52 +66,53 @@ class Field {
 
   }
 
-  // move() {
+  playGame() {
+    let active = true;
+    console.log("--------------");
+    console.log("You've(*) lost your hat(^) in a field(░) with holes(O) in it.");
+    console.log("Navigate back to it without falling down one of the holes or stepping outside of the field.");
+    console.log('Enter r l u or d to go right, left, up or down.');
+    console.log("--------------");
+    this.renderField();
+    console.log("--------------");
+    while (active) {
+      let direction = this.askDirection();
+      let location = this.move(direction.toLowerCase());
+      if (location == 'invalid') continue;
+      console.log(location, typeof location)                                // TEST
+      let result = this.checkNextStep(location[0], location[1]);
+    
+    
 
-  // }
+      active = false;
+    }
+
+
+  }
 }
 
 // Class instance
-const playing = new Field([
+const findHat3x3 = new Field([
   ['*', '░', 'O'],
   ['░', 'O', '░'],
   ['░', '^', '░'],
 ]);
 
-// Gameplay
-let active = true;
-console.log("--------------");
-console.log("You've(*) lost your hat(^) in a field(░) with holes(O) in it.");
-console.log("Navigate back to it without falling down one of the holes or stepping outside of the field.");
-console.log('Enter r l u or d to go right, left, up or down.');
-console.log("--------------");
-console.log('xMax: ' + playing.xMax, 'yMax: ' + playing.yMax, 'xAxis: ' + playing.xAxis, 'yAxis: ' + playing.yAxis);          // TEST
-console.log();                                                                                // TEST
-playing.print();
-while (active) {
-  let input = prompt('Which direction? ');
+// Activate game
+findHat3x3.playGame();
 
-  // if (input === r) {
-  //   checkStatus(xAxis + 1, yAxis);
-  // }
-
-
-
-  console.log(`Ok ${input}.`)
-  active = false;
-}
 
 // Game Results
 
 
 // TESTING
-console.log(playing.checkNextStep(playing.xAxis, playing.yAxis));
-console.log(playing.checkNextStep(playing.xAxis + 1, playing.yAxis + 2));
-console.log(playing.checkNextStep(playing.xAxis + 2, playing.yAxis));
-console.log(playing.checkNextStep(playing.xAxis - 1, playing.yAxis));
-console.log(playing.checkNextStep(playing.xAxis + 3, playing.yAxis));
-console.log(playing.checkNextStep(playing.xAxis, playing.yAxis - 1));
-console.log(playing.checkNextStep(playing.xAxis, playing.yAxis + 3));
-console.log(playing.checkNextStep(playing.xAxis + 1, playing.yAxis));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis, findHat3x3.yAxis));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis + 1, findHat3x3.yAxis + 2));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis + 2, findHat3x3.yAxis));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis - 1, findHat3x3.yAxis));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis + 3, findHat3x3.yAxis));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis, findHat3x3.yAxis - 1));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis, findHat3x3.yAxis + 3));
+// console.log(findHat3x3.checkNextStep(findHat3x3.xAxis + 1, findHat3x3.yAxis));
 // console.log(myField);
-// myField.print();
+// myField.renderField();
