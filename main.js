@@ -6,7 +6,7 @@
 // NPM module to automatically prompt user input
 const prompt = require('../node_modules/prompt-sync')({sigint: true});
 
-// Game Class
+// Game class
 class Field {
   constructor(array) {
     this.field = array;
@@ -47,7 +47,7 @@ class Field {
   }
 
   checkNextStep(x, y) {
-    if (x > this.xMax || x < 0 || y > this.xMax || y < 0) {
+    if (x > this.xMax || x < 0 || y > this.yMax || y < 0) {
       return "boundary";
     }
     else if (this.field[y][x] === "O") {
@@ -59,20 +59,41 @@ class Field {
     else {
       return "field";
     }
-
   }
 
   updateField() {
     this.field[this.yAxis][this.xAxis] = "*";
   }
 
-  gameEnd() {
-    console.log("GAME ENDED.")                                    // TEST
+  gameEnd(result) {
+    if (result == 'boundary') {
+      console.log("Awww. You've stepped outside the field boundary.");
+      console.log("Sorry. You'll not get your hat back this time.");
+      console.log("-- GAME OVER --");
+    }
+    else if (result == 'hole') {
+      this.field[this.yAxis][this.xAxis] = "X";
+      this.renderField();
+      console.log("Nooo! You've fallen down a hole in the field.");
+      console.log("Sorry. You'll not get your hat back this time.");
+      console.log("-- GAME OVER --");
+    }
+    else if (result == 'hat') {
+      this.field[this.yAxis][this.xAxis] = "✓";
+      this.renderField();
+      console.log("YES! You've located your hat!");
+      console.log("Great job! It's good to have your hat back.");
+      console.log("-- YOU WIN!!! --");
+    }
+    else {
+      console.log("-- GAME OVER --");
+    }
   }
 
   playGame() {
     let active = true;
     console.log("--------------");
+    console.log("FIND YOUR HAT");
     console.log("You've(*) lost your hat(^) in a field(░) with holes(O) in it.");
     console.log("Navigate back to it without falling down one of the holes or stepping outside of the field.");
     console.log('Enter r l u or d to go right, left, up or down.');
@@ -83,7 +104,6 @@ class Field {
       let direction = this.askDirection();
       let location = this.move(direction.toLowerCase());
       if (location == 'invalid') continue;
-      console.log(location, typeof location)                                // TEST
       let result = this.checkNextStep(location[0], location[1]);
       if (result == 'field') {
         this.updateField();
@@ -92,7 +112,7 @@ class Field {
       }
       else {
         active = false;
-        this.gameEnd();
+        this.gameEnd(result);
       }
     }
   }
