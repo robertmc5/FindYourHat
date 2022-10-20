@@ -9,12 +9,21 @@ const prompt = require('../node_modules/prompt-sync')({sigint: true});
 // Game class
 class Field {
   constructor(array) {
-    this.field = array;
-    this.xAxis = 0;
-    this.yAxis = 0;
-    this.xMax = array[0].length - 1;
-    this.yMax = array.length - 1;
+    this.field = array[0];
+    this.xMax = array[0][0].length - 1;
+    this.yMax = array[0].length - 1;
+    this.xAxis = array[1][0];
+    this.yAxis = array[1][1];
     this.steps = 0;
+  }
+
+  static startingPoint(maxLength) {
+    let range = Math.floor(maxLength / 3);
+    let axis = Field.random(range);
+    if (Field.random(2) == 0) {
+      axis = (maxLength - 1) - axis;
+    }
+    return axis;
   }
 
   static generateField(height, width, percentHoles) {
@@ -28,21 +37,28 @@ class Field {
       }
       column.push(row);
     }
-    column[0][0] = '*';
-    let randomHatX = width - Field.random(Math.floor(width / 1.6)) - 1;
-    let randomHatY = height - Field.random(Math.floor(height / 1.6)) - 1;
-    column[randomHatY][randomHatX] = '^';
+    let xStart = Field.startingPoint(width);
+    let yStart = Field.startingPoint(height);
+    console.log("===> ", xStart, yStart);                                                 // TEST
+    column[yStart][xStart] = '*';
+    let hatX = Field.startingPoint(width);
+    let hatY = Field.startingPoint(height);
+    (xStart < Math.floor(width / 2) && hatX < Math.floor(width / 2)) ? hatX = (width - 1) - hatX : hatX = hatX;
+    (xStart > Math.floor(width / 2) && hatX > Math.floor(width / 2)) ? hatX = (width - 1) - hatX : hatX = hatX;
+    (yStart < Math.floor(height / 2) && hatY < Math.floor(height / 2)) ? hatY = (height - 1) - hatY : hatY = hatY;
+    (yStart > Math.floor(height / 2) && hatY > Math.floor(height / 2)) ? hatY = (height - 1) - hatY : hatY = hatY;
+    column[hatY][hatX] = '^';
     let holes = 0;
     while (holes < numberHoles) {
       let holeX = Field.random(width);
       let holeY = Field.random(height);
-      if (column[holeY][holeX] == 'O' || column[holeY][holeX] == '^' || (holeX < 2 && holeY < 2)) {
+      if ("O^*".includes(column[holeY][holeX])) {
         continue;
       }
       column[holeY][holeX] = 'O';
       holes++;
     }
-    return column;
+    return [column, [xStart, yStart]];
   }
 
   static random(range) {
