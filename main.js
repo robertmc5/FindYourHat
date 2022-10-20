@@ -14,6 +14,49 @@ class Field {
     this.yAxis = 0;
     this.xMax = array[0].length - 1;
     this.yMax = array.length - 1;
+    this.steps = 0;
+  }
+
+  static generateField(height, width, percentHoles) {
+    let numberHoles = Math.round(((height * width) - 2) * percentHoles);
+    console.log("numberHoles: " + numberHoles);                                    // TEST
+    let column = [];
+    for (let i = 0; i < height; i++) {
+      let row = [];
+      for (let j = 0; j < width; j++) {
+        row.push('░');
+      }
+      column.push(row);
+    }
+    column[0][0] = '*';
+    let randomHatX = width - Field.random(Math.floor(width / 1.6)) - 1;
+    let randomHatY = height - Field.random(Math.floor(height / 1.6)) - 1;
+    column[randomHatY][randomHatX] = '^';
+    let holes = 0;
+    while (holes < numberHoles) {
+      let holeX = Field.random(width);
+      let holeY = Field.random(height);
+      if (column[holeY][holeX] == 'O' || column[holeY][holeX] == '^' || (holeX < 2 && holeY < 2)) {
+        continue;
+      }
+      column[holeY][holeX] = 'O';
+      holes++;
+    }
+    return column;
+  }
+
+  static random(range) {
+    let randomNum = Math.floor(Math.random() * range);
+    return randomNum;
+  }
+
+  static introduction() {
+    console.log("--------------");
+    console.log("FIND YOUR HAT");
+    console.log("You've(*) lost your hat(^) in a field(░) with holes(O) in it.");
+    console.log("Navigate back to it without falling down one of the holes or stepping outside of the field.");
+    console.log('Enter r l u or d to go right, left, up or down.');
+    console.log("-----------------------------------------------");
   }
 
   renderField() {
@@ -81,7 +124,7 @@ class Field {
     else if (result == 'hat') {
       this.field[this.yAxis][this.xAxis] = "✓";
       this.renderField();
-      console.log("YES! You've located your hat!");
+      console.log(`YES! You've located your hat in ${this.steps + 1} steps!`);
       console.log("Great job! It's good to have your hat back.");
       console.log("-- YOU WIN!!! --");
     }
@@ -92,12 +135,7 @@ class Field {
 
   playGame() {
     let active = true;
-    console.log("--------------");
-    console.log("FIND YOUR HAT");
-    console.log("You've(*) lost your hat(^) in a field(░) with holes(O) in it.");
-    console.log("Navigate back to it without falling down one of the holes or stepping outside of the field.");
-    console.log('Enter r l u or d to go right, left, up or down.');
-    console.log("-----------------------------------------------");
+    Field.introduction();
     this.renderField();
     console.log("----------------");
     while (active) {
@@ -108,6 +146,7 @@ class Field {
       if (result == 'field') {
         this.updateField();
         this.renderField();
+        this.steps++;
         console.log("----------------");
       }
       else {
@@ -118,12 +157,7 @@ class Field {
   }
 }
 
-// Class instance
-const findHat3x3 = new Field([
-  ['*', '░', 'O'],
-  ['░', 'O', '░'],
-  ['░', '^', '░'],
-]);
-
 // Activate game
-findHat3x3.playGame();
+let currentField = Field.generateField(9, 15, 0.25);
+let session = new Field(currentField);
+session.playGame();
