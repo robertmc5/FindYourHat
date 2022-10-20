@@ -28,7 +28,6 @@ class Field {
 
   static generateField(height, width, percentHoles) {
     let numberHoles = Math.round(((height * width) - 2) * percentHoles);
-    console.log("numberHoles: " + numberHoles);                                    // TEST
     let column = [];
     for (let i = 0; i < height; i++) {
       let row = [];
@@ -39,7 +38,6 @@ class Field {
     }
     let xStart = Field.startingPoint(width);
     let yStart = Field.startingPoint(height);
-    console.log("===> ", xStart, yStart);                                                 // TEST
     column[yStart][xStart] = '*';
     let hatX = Field.startingPoint(width);
     let hatY = Field.startingPoint(height);
@@ -86,6 +84,7 @@ class Field {
   }
 
   move(direction) {
+    (this.steps > 0) ? this.updateField("•") : this.updateField("*");
     switch (direction) {
       case 'r': 
         this.xAxis += 1;
@@ -120,8 +119,8 @@ class Field {
     }
   }
 
-  updateField() {
-    this.field[this.yAxis][this.xAxis] = "*";
+  updateField(char) {
+    this.field[this.yAxis][this.xAxis] = char;
   }
 
   gameEnd(result) {
@@ -160,7 +159,7 @@ class Field {
       if (location == 'invalid') continue;
       let result = this.checkNextStep(location[0], location[1]);
       if (result == 'field') {
-        this.updateField();
+        this.updateField("*");
         this.renderField();
         this.steps++;
         console.log("----------------");
