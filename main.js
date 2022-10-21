@@ -3,7 +3,7 @@
 // and they must navigate back to it without falling down one of the holes or stepping outside of the field.
 // This requires Node.js and the NPM prompt-sync package installed
 
-// NPM module to automatically prompt user input
+// NPM module to automatically prompt user input in the terminal
 const prompt = require('../node_modules/prompt-sync')({sigint: true});
 
 // Setup class to determine game size, difficulty, mode and continuation
@@ -15,8 +15,15 @@ class GameSetup {
     this.modeOfPlay = true;
   }
 
+  // After game is played, it restarts a new game if the player wants
+  restartNewGame() {
+    begin = new GameSetup();
+    begin.chooseGameSetup();
+  }
+
+  // Starts the game by asking three game setup questions, then instantiating the game class: Field
   chooseGameSetup() {
-    console.log("==========================================");
+    console.log("===============================================");
     console.log("FIND YOUR HAT");
     console.log("------------------------------------------");
     let invalid = true;
@@ -41,6 +48,7 @@ class GameSetup {
       }
       invalid = false;
     }
+
     console.log("- - - - - - - - - - - - - - - - -");
     invalid = true;
     console.log('More holes in the field makes it harder or impossible.');
@@ -62,6 +70,7 @@ class GameSetup {
       }
       invalid = false;
     }
+
     console.log("- - - - - - - - - - - - - - - - -");
     invalid = true;
     console.log('You can choose regular mode or sinkhole mode.');
@@ -80,10 +89,34 @@ class GameSetup {
       }
       invalid = false;
     }
+
+    // Generate field and start new game
     let currentField = Field.generateField(this.height, this.width, this.percentHoles);
     let currentFieldMode = [currentField, this.modeOfPlay];
     let session = new Field(currentFieldMode);
     session.playGame();
+
+    // Prompt to start over another game or quit
+    console.log();
+    console.log("-----------------------------------------------");
+    invalid = true;
+    while (invalid) {
+      let replay = prompt('Would you like to play again? Yes-(y) or No-(n): ');
+      if (!"yn".includes(replay.toLowerCase())) {
+        console.log('-- PLEASE ENTER [y] [n] OR [ENTER] DEFAULTS TO YES --');
+        continue;
+      }
+      else if (replay.toLowerCase() == 'n') {
+        invalid = false;
+        console.log();
+        console.log("Thanks for playing. Enjoy your day.");
+        console.log("-----------------------------------");
+      }
+      else if (replay.toLowerCase() == 'y' || replay == '') {
+        invalid = false;
+        this.restartNewGame();
+      }
+    }
   }
 }
 
@@ -99,6 +132,7 @@ class Field {
     this.steps = 0;
   }
 
+  // Creates random starting point for player
   static startingPoint(maxLength) {
     let range = Math.floor(maxLength / 3);
     let axis = Field.random(range);
@@ -108,6 +142,7 @@ class Field {
     return axis;
   }
 
+  // Creates the initial playing field based on player preferences and random selection
   static generateField(height, width, percentHoles) {
     let numberHoles = Math.round(((height * width) - 2) * percentHoles);
     let column = [];
@@ -141,11 +176,13 @@ class Field {
     return [column, [xStart, yStart]];
   }
 
+  // Helper function for random selection
   static random(range) {
     let randomNum = Math.floor(Math.random() * range);
     return randomNum;
   }
 
+  // Instructions at the start of game
   static introduction() {
     console.log("---------------------------");
     console.log("FIND YOUR HAT");
@@ -155,6 +192,7 @@ class Field {
     console.log("-----------------------------------------------");
   }
 
+  // Creates sinkholes during play if player selected this functionality
   openSinkhole() {
     let scanning = true;
     while (scanning) {
@@ -168,16 +206,19 @@ class Field {
     }
   }
 
+  // Prints the current field onscreen
   renderField() {
     let fieldPrintPrep = this.field.map(e => '\t' + e.join(''));
     console.log(fieldPrintPrep.join('\n'));
   }
 
+  // Prompts the player to input a direction during gameplay
   askDirection() {
     let input = prompt('Which direction? ');
     return input;
   }
 
+  // Establishes the location of the player's next step
   move(direction) {
     (this.steps > 0) ? this.updateField("•") : this.updateField("*");
     switch (direction) {
@@ -199,6 +240,7 @@ class Field {
     }
   }
 
+  // Determines what type of spot the player just stepped on
   checkNextStep(x, y) {
     if (x > this.xMax || x < 0 || y > this.yMax || y < 0) {
       return "boundary";
@@ -217,10 +259,12 @@ class Field {
     }
   }
 
+  // Notates the current location of the player
   updateField(char) {
     this.field[this.yAxis][this.xAxis] = char;
   }
 
+  // Prints the results of the game when it ends
   gameEnd(result) {
     if (result == 'boundary') {
       console.log("Awww. You've stepped outside the field boundary.");
@@ -246,6 +290,7 @@ class Field {
     }
   }
 
+  // Active game method that manages gameplay
   playGame() {
     let active = true;
     Field.introduction();
@@ -273,6 +318,6 @@ class Field {
   }
 }
 
-// Activate game
+// Activates game
 let begin = new GameSetup();
 begin.chooseGameSetup();
