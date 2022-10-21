@@ -12,7 +12,7 @@ class GameSetup {
     this.height = 9;
     this.width = 15;
     this.percentHoles = 0.25;
-    this.modeOfPlay = false;                                                // TODO - mode?
+    this.modeOfPlay = true;
   }
 
   chooseGameSetup() {
@@ -69,23 +69,20 @@ class GameSetup {
     while (invalid) {
       let sinkhole = prompt('Regular-(R) or Sinkhole-(S): ');
       if (!"rs".includes(sinkhole.toLowerCase())) {
-        console.log('-- PLEASE ENTER [R] [S] OR [ENTER] DEFAULTS TO REGULAR --');
+        console.log('-- PLEASE ENTER [R] [S] OR [ENTER] DEFAULTS TO SINKHOLE --');
         continue;
       }
-      else if (sinkhole.toLowerCase() == 's') {
-        this.modeOfPlay = true;
-      }
-      else if (sinkhole.toLowerCase() == 'r' || sinkhole == '') {
+      else if (sinkhole.toLowerCase() == 'r') {
         this.modeOfPlay = false;
+      }
+      else if (sinkhole.toLowerCase() == 's' || sinkhole == '') {
+        this.modeOfPlay = true;
       }
       invalid = false;
     }
-
-
-
-  
     let currentField = Field.generateField(this.height, this.width, this.percentHoles);
-    let session = new Field(currentField);                                    // TODO - mode?
+    let currentFieldMode = [currentField, this.modeOfPlay];
+    let session = new Field(currentFieldMode);
     session.playGame();
   }
 }
@@ -93,11 +90,12 @@ class GameSetup {
 // Game class
 class Field {
   constructor(array) {
-    this.field = array[0];
-    this.xMax = array[0][0].length - 1;
-    this.yMax = array[0].length - 1;
-    this.xAxis = array[1][0];
-    this.yAxis = array[1][1];
+    this.field = array[0][0];
+    this.xMax = array[0][0][0].length - 1;
+    this.yMax = array[0][0].length - 1;
+    this.xAxis = array[0][1][0];
+    this.yAxis = array[0][1][1];
+    this.sinkhole = array[1];
     this.steps = 0;
   }
 
@@ -157,6 +155,19 @@ class Field {
     console.log("-----------------------------------------------");
   }
 
+  openSinkhole() {
+    let scanning = true;
+    while (scanning) {
+      let sinkholeX = Field.random(this.xMax + 1);
+      let sinkholeY = Field.random(this.yMax + 1);
+      if ("O^*♨".includes(this.field[sinkholeY][sinkholeX])) {
+        continue;
+      }
+      this.field[sinkholeY][sinkholeX] = '♨';
+      scanning = false;
+    }
+  }
+
   renderField() {
     let fieldPrintPrep = this.field.map(e => '\t' + e.join(''));
     console.log(fieldPrintPrep.join('\n'));
@@ -195,6 +206,9 @@ class Field {
     else if (this.field[y][x] === "O") {
       return "hole";
     }
+    else if (this.field[y][x] === "♨") {
+      return "sinkhole";
+    }
     else if (this.field[y][x] === "^") {
       return "hat";
     }
@@ -213,10 +227,10 @@ class Field {
       console.log("Sorry. You'll not get your hat back this time.");
       console.log("-- GAME OVER --");
     }
-    else if (result == 'hole') {
+    else if (result == 'hole' || result == 'sinkhole') {
       this.field[this.yAxis][this.xAxis] = "X";
       this.renderField();
-      console.log("Nooo! You've fallen down a hole in the field.");
+      console.log(`Nooo! You've fallen down a ${result} in the field.`);
       console.log("Sorry. You'll not get your hat back this time.");
       console.log("-- GAME OVER --");
     }
@@ -244,8 +258,11 @@ class Field {
       let result = this.checkNextStep(location[0], location[1]);
       if (result == 'field') {
         this.updateField("*");
-        this.renderField();
         this.steps++;
+        if (this.sinkhole) {
+          this.openSinkhole();
+        }
+        this.renderField();
         console.log("----------------");
       }
       else {
