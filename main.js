@@ -6,6 +6,90 @@
 // NPM module to automatically prompt user input
 const prompt = require('../node_modules/prompt-sync')({sigint: true});
 
+// Setup class to determine game size, difficulty, mode and continuation
+class GameSetup {
+  constructor() {
+    this.height = 9;
+    this.width = 15;
+    this.percentHoles = 0.25;
+    this.modeOfPlay = false;                                                // TODO - mode?
+  }
+
+  chooseGameSetup() {
+    console.log("==========================================");
+    console.log("FIND YOUR HAT");
+    console.log("------------------------------------------");
+    let invalid = true;
+    console.log('How big of a field do you want to play on?');
+    while (invalid) {
+      let size = prompt('Small-(S) Medium-(M) or Large-(L): ');
+      if (!"slm".includes(size.toLowerCase())) {
+        console.log('-- PLEASE ENTER [S] [M] [L] OR [ENTER] DEFAULTS TO MEDIUM --');
+        continue;
+      }
+      else if (size.toLowerCase() == 's') {
+        this.height = 6;
+        this.width = 10;
+      }
+      else if (size.toLowerCase() == 'l') {
+        this.height = 15;
+        this.width = 25;
+      }
+      else if (size.toLowerCase() == 'm' || size == '') {
+        this.height = 9;
+        this.width = 15;
+      }
+      invalid = false;
+    }
+    console.log("- - - - - - - - - - - - - - - - -");
+    invalid = true;
+    console.log('More holes in the field makes it harder or impossible.');
+    console.log('What amount of holes do you want to have to deal with?');
+    while (invalid) {
+      let percent = prompt('Fewer-(F) Regular-(R) or Many-(M): ');
+      if (!"frm".includes(percent.toLowerCase())) {
+        console.log('-- PLEASE ENTER [F] [R] [M] OR [ENTER] DEFAULTS TO REGULAR --');
+        continue;
+      }
+      else if (percent.toLowerCase() == 'f') {
+        this.percentHoles = 0.18;
+      }
+      else if (percent.toLowerCase() == 'm') {
+        this.percentHoles = 0.28;
+      }
+      else if (percent.toLowerCase() == 'r' || percent == '') {
+        this.percentHoles = 0.23;
+      }
+      invalid = false;
+    }
+    console.log("- - - - - - - - - - - - - - - - -");
+    invalid = true;
+    console.log('You can choose regular mode or sinkhole mode.');
+    console.log('Sinkholes make it harder to win as you play.');
+    while (invalid) {
+      let sinkhole = prompt('Regular-(R) or Sinkhole-(S): ');
+      if (!"rs".includes(sinkhole.toLowerCase())) {
+        console.log('-- PLEASE ENTER [R] [S] OR [ENTER] DEFAULTS TO REGULAR --');
+        continue;
+      }
+      else if (sinkhole.toLowerCase() == 's') {
+        this.modeOfPlay = true;
+      }
+      else if (sinkhole.toLowerCase() == 'r' || sinkhole == '') {
+        this.modeOfPlay = false;
+      }
+      invalid = false;
+    }
+
+
+
+  
+    let currentField = Field.generateField(this.height, this.width, this.percentHoles);
+    let session = new Field(currentField);                                    // TODO - mode?
+    session.playGame();
+  }
+}
+
 // Game class
 class Field {
   constructor(array) {
@@ -65,7 +149,7 @@ class Field {
   }
 
   static introduction() {
-    console.log("--------------");
+    console.log("---------------------------");
     console.log("FIND YOUR HAT");
     console.log("You've(*) lost your hat(^) in a field(░) with holes(O) in it.");
     console.log("Navigate back to it without falling down one of the holes or stepping outside of the field.");
@@ -173,6 +257,5 @@ class Field {
 }
 
 // Activate game
-let currentField = Field.generateField(9, 15, 0.25);
-let session = new Field(currentField);
-session.playGame();
+let begin = new GameSetup();
+begin.chooseGameSetup();
