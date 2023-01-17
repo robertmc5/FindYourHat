@@ -1,0 +1,19 @@
+{
+  "name": "findyourhat",
+  "version": "2.0.0",
+  "description": "An interactive terminal game. Move towards hat. Avoid holes/sinkholes in field.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robertmc5/FindYourHat.git"
+  },
+  "author": "Robert McCarter",
+  "license": "MIT",
+  "homepage": "https://github.com/robertmc5/FindYourHat#readme",
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
+  }
+}

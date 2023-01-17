@@ -4,7 +4,7 @@
 // This requires Node.js and the NPM prompt-sync package installed
 
 // NPM module to automatically prompt user input in the terminal
-const prompt = require('../node_modules/prompt-sync')({sigint: true});
+const prompt = require('./node_modules/prompt-sync')({sigint: true});
 
 // Setup class to determine game size, difficulty, mode and continuation
 class GameSetup {
